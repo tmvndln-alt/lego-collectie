@@ -546,7 +546,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
     </div>
     <div class="modal-foot">
       <button class="btn-outline" id="cancelBtn">Annuleren</button>
-      <button class="btn-primary" id="saveBtn">Bewaar in setsboek</button>
+      <button class="btn-primary" id="saveBtn">Bewaar in bouwboek</button>
     </div>
   </div>
 </div>
@@ -1432,6 +1432,13 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function withTimeout(promise, ms, timeoutMessage) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMessage)), ms)),
+  ]);
+}
+
 async function handleSave() {
   clearError();
   if (!currentPhotos.length) { showError('Voeg eerst een foto toe.'); return; }
@@ -1463,11 +1470,18 @@ async function handleSave() {
     datumToegevoegd: existing ? existing.datumToegevoegd : new Date().toISOString(),
   };
 
+  const saveBtn = document.getElementById('saveBtn');
+  const originalLabel = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Bezig met bewaren…';
   try {
-    await saveItem(item);
+    await withTimeout(saveItem(item), 10000, 'Opslaan duurt ongewoon lang en is afgebroken. Herlaad de pagina en probeer het opnieuw — je gegevens hierboven blijven staan totdat je de pagina ververst.');
     closeForm();
   } catch (err) {
     showError('Opslaan is niet gelukt: ' + (err && err.message ? err.message : String(err)));
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalLabel;
   }
 }
 
@@ -1544,7 +1558,7 @@ async function handleExport() {
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    triggerDownload(blob, `setsboek-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    triggerDownload(blob, `bouwboek-${new Date().toISOString().slice(0, 10)}.xlsx`);
     markExported();
   } catch (err) {
     showGlobalError('Exporteren naar Excel is niet gelukt: ' + (err && err.message ? err.message : String(err)));
@@ -1673,7 +1687,7 @@ async function handleExportPdf() {
       }
     }
 
-    doc.save(`setsboek-${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(`bouwboek-${new Date().toISOString().slice(0, 10)}.pdf`);
     markExported();
   } catch (err) {
     showGlobalError('PDF maken is niet gelukt: ' + (err && err.message ? err.message : String(err)));
