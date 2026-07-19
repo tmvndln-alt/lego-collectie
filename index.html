@@ -837,10 +837,12 @@ function updateSyncBadge() {
   syncBadge.textContent = syncMode ? '● gesynchroniseerd' : '';
 }
 
-function initSync() {
+let currentConfigKey = null;
+
+async function initSync() {
   const config = getFirebaseConfig();
   if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
-  if (!config) { syncMode = false; updateSyncBadge(); loadItems(); return; }
+  if (!config) { syncMode = false; currentConfigKey = null; updateSyncBadge(); loadItems(); return; }
   if (typeof firebase === 'undefined') {
     syncMode = false;
     updateSyncBadge();
@@ -848,13 +850,21 @@ function initSync() {
     loadItems();
     return;
   }
+  const configKey = JSON.stringify(config);
+  if (syncMode && configKey === currentConfigKey && firestoreDb) {
+    // Configuratie is niet gewijzigd en de verbinding staat al — niets opnieuw opzetten.
+    updateSyncBadge();
+    clearGlobalError();
+    return;
+  }
   try {
     if (!firebase.apps.length) {
       firebase.initializeApp(config);
     } else {
-      firebase.app().delete().catch(() => {});
+      await firebase.app().delete().catch(() => {});
       firebase.initializeApp(config);
     }
+    currentConfigKey = configKey;
     firestoreDb = firebase.firestore();
     if (!persistenceAttempted) {
       persistenceAttempted = true;
