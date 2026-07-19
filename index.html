@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1B2A1E">
+<title>Bouwboek</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Bouwboek%22,%22short_name%22:%22Bouwboek%22,%22display%22:%22standalone%22,%22start_url%22:%22.%22,%22background_color%22:%22%23EFE7D2%22,%22theme_color%22:%221B2A1E%22}">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --ink: #1B2A1E;
+  --paper: #EFE7D2;
+  --cream: #F8F3E6;
+  --brass: #B8873B;
+  --brass-dark: #8F6B2C;
+  --rust: #9C3B2E;
+  --forest-mid: #3A5745;
+  --text-dark: #241F17;
+  --line: #D9CDAE;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text-dark);
+  font-family: 'Work Sans', sans-serif;
+  padding-bottom: 60px;
+}
+.serif { font-family: 'Fraunces', serif; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass-dark);
+  margin: 0 0 4px;
+}
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+.btn-row { display: flex; gap: 8px; position: relative; }
+.dropdown-wrap { position: relative; }
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  min-width: 200px;
+  box-shadow: 0 10px 24px -8px rgba(27,42,30,0.35);
+  z-index: 60;
+  overflow: hidden;
+}
+.dropdown-menu.open { display: block; }
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 11px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-family: 'Work Sans', sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+.dropdown-menu button:last-child { border-bottom: none; }
+.dropdown-menu button:hover { background: var(--paper); }
+.dropdown-menu button:disabled { opacity: 0.4; cursor: default; }
+button {
+  font-family: 'Work Sans', sans-serif;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary { background: var(--ink); color: var(--cream); }
+.btn-primary:hover { background: var(--forest-mid); }
+.btn-brass { background: var(--brass); color: var(--ink); }
+.btn-brass:hover { background: var(--brass-dark); color: var(--cream); }
+.chip {
+  border: 1px solid var(--line);
+  background: var(--cream);
+  color: var(--text-dark);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.chip.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.chip .count { color: var(--brass-dark); }
+.chip.active .count { color: var(--brass); }
+.btn-outline { background: transparent; border: 1px solid var(--line); color: var(--ink); padding: 6px 10px; font-size: 12px; }
+.btn-outline.danger { color: var(--rust); }
+button:disabled { opacity: 0.4; cursor: default; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+
+.search-wrap { max-width: 380px; margin-bottom: 24px; position: relative; }
+.search-wrap input {
+  width: 100%;
+  padding: 10px 12px 10px 34px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  border-radius: 3px;
+  font-size: 14px;
+  font-family: 'Work Sans', sans-serif;
+}
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--brass-dark); font-size: 14px; }
+
+.empty-state { text-align: center; padding: 80px 20px; }
+.empty-state p.title { font-size: 20px; margin-bottom: 6px; color: var(--forest-mid); }
+.empty-state p.hint { font-size: 13px; color: var(--brass-dark); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+.card {
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -12px rgba(27,42,30,0.35); }
+.photo-wrap { position: relative; }
+.photo-wrap img, .photo-placeholder {
+  width: 100%;
+  height: 192px;
+  object-fit: cover;
+  display: block;
+  clip-path: polygon(0% 0%,100% 0%,100% 93%,95% 97%,90% 93%,85% 97%,80% 93%,75% 97%,70% 93%,65% 97%,60% 93%,55% 97%,50% 93%,45% 97%,40% 93%,35% 97%,30% 93%,25% 97%,20% 93%,15% 97%,10% 93%,5% 97%,0% 93%);
+}
+.photo-placeholder { background: var(--line); display: flex; align-items: center; justify-content: center; color: var(--brass-dark); font-size: 12px; }
+.stamp {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  border: 1.5px solid var(--rust);
+  color: var(--rust);
+  background: rgba(255,255,255,0.88);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.card-body h3 { font-size: 17px; font-weight: 600; color: var(--ink); margin: 0; line-height: 1.2; }
+.tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--brass-dark); }
+.value { font-size: 14px; color: var(--rust); margin: 2px 0 0; }
+.loc { font-size: 12px; color: var(--forest-mid); margin: 2px 0 0; }
+.card-actions { margin-top: 10px; display: flex; gap: 6px; }
+
+/* Modal */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(27,42,30,0.55);
+  z-index: 50;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 16px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--cream);
+  width: 100%;
+  max-width: 560px;
+  border-radius: 3px;
+  margin: 24px 0;
+}
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head h2 { font-size: 20px; font-weight: 600; color: var(--ink); margin: 0; }
+.modal-head button { background: none; padding: 4px; font-size: 18px; color: var(--ink); }
+.modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.error-box {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  background: #F4E4DE;
+  color: var(--rust);
+  padding: 10px 12px;
+  border-radius: 3px;
+}
+.error-box.show { display: flex; }
+
+.photo-drop {
+  width: 100%;
+  height: 170px;
+  border: 2px dashed var(--line);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--brass-dark);
+  font-size: 14px;
+  cursor: pointer;
+  background: none;
+}
+.photo-preview-wrap { position: relative; }
+.photo-preview-wrap img { width: 100%; height: 208px; object-fit: cover; border-radius: 3px; display: block; }
+.photo-preview-wrap .change-btn {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(255,255,255,0.9); color: var(--ink);
+  font-size: 12px; padding: 5px 9px;
+}
+.photo-thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+}
+.photo-thumb {
+  position: relative;
+  height: 88px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-thumb .cover-tag {
+  position: absolute; bottom: 3px; left: 3px;
+  font-size: 9px; background: rgba(255,255,255,0.9); color: var(--forest-mid);
+  padding: 1px 5px; border-radius: 2px; font-family: 'IBM Plex Mono', monospace;
+}
+.photo-thumb .remove-btn {
+  position: absolute; top: 3px; right: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); color: #fff;
+  font-size: 13px; line-height: 1; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.photo-thumb-move {
+  position: absolute; bottom: 3px; right: 3px;
+  display: flex; gap: 3px;
+}
+.photo-thumb-move button {
+  width: 20px; height: 20px; border-radius: 3px;
+  background: rgba(0,0,0,0.55); color: #fff;
+  font-size: 10px; line-height: 1; padding: 0; border: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.photo-thumb-move span { width: 20px; height: 20px; display: inline-block; }
+.photo-thumb-add {
+  height: 88px;
+  border: 2px dashed var(--line);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brass-dark);
+  font-size: 22px;
+  background: none;
+}
+.photo-count-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+.field label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brass-dark);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.field input, .field textarea {
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: 'Work Sans', sans-serif;
+  color: var(--text-dark);
+}
+.field input:focus, .field textarea:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+
+.modal-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-icon { background: transparent; border: 1px solid var(--line); color: var(--ink); padding: 10px 12px; font-size: 15px; }
+.btn-icon:hover { background: var(--cream); }
+.ai-btn { width: 100%; margin-top: 10px; justify-content: center; }
+.ai-hint { font-size: 12px; margin-top: 6px; color: var(--forest-mid); font-family: 'IBM Plex Mono', monospace; }
+.settings-modal .modal { max-width: 440px; }
+.detail-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.detail-photo-grid img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+.detail-grid .full { grid-column: 1 / -1; }
+.detail-field-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brass-dark);
+  font-family: 'IBM Plex Mono', monospace;
+  margin: 0 0 2px;
+}
+.detail-field-value {
+  font-size: 14px;
+  color: var(--text-dark);
+  margin: 0;
+  white-space: pre-wrap;
+}
+.detail-stamp {
+  display: inline-block;
+  border: 1.5px solid var(--rust);
+  color: var(--rust);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.settings-text { font-size: 13px; line-height: 1.5; color: var(--text-dark); }
+.batch-modal .modal { max-width: 640px; }
+.batch-drop {
+  width: 100%;
+  height: 140px;
+  border: 2px dashed var(--line);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--brass-dark);
+  font-size: 14px;
+  cursor: pointer;
+  background: none;
+}
+.batch-list { display: flex; flex-direction: column; gap: 10px; }
+.batch-card {
+  display: flex;
+  gap: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 8px;
+}
+.batch-card img { width: 64px; height: 64px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+.batch-card-fields { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.batch-card-row { display: flex; gap: 6px; }
+.batch-card input {
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 5px 7px;
+  font-size: 12.5px;
+  font-family: 'Work Sans', sans-serif;
+  color: var(--text-dark);
+  flex: 1;
+  min-width: 0;
+}
+.batch-card-remove {
+  background: none;
+  border: none;
+  color: var(--rust);
+  font-size: 16px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.batch-card-err { font-size: 11px; color: var(--rust); }
+.batch-card.analyzing { opacity: 0.6; }
+.batch-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.settings-text a { color: var(--brass-dark); }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.2); border-top-color: currentColor; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .spinner { animation: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <p class="eyebrow mono">Lego-collectie</p>
+      <h1 class="serif">Bouwboek</h1>
+      <p class="mono" id="syncBadge" style="font-size:11px;color:var(--forest-mid);margin:4px 0 0;"></p>
+    </div>
+    <div class="btn-row">
+      <button class="btn-icon" id="settingsBtn" title="AI-instellingen" aria-label="AI-instellingen">⚙</button>
+      <div class="dropdown-wrap">
+        <button class="btn-brass" id="exportMenuBtn">⬇ Exporteren ▾</button>
+        <div class="dropdown-menu" id="exportMenu">
+          <button type="button" id="exportPdfBtn">Naar PDF</button>
+          <button type="button" id="exportBtn">Naar Excel</button>
+          <button type="button" id="exportInsuranceBtn">Verzekeringsrapport</button>
+        </div>
+      </div>
+      <div class="dropdown-wrap">
+        <button class="btn-primary" id="addMenuBtn">+ Toevoegen ▾</button>
+        <div class="dropdown-menu" id="addMenu">
+          <button type="button" id="addBtn">Nieuwe set</button>
+          <button type="button" id="batchAddBtn">Batch toevoegen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="globalError" class="error-box" style="max-width:600px;margin-bottom:16px;"></div>
+  <div id="backupBanner" class="error-box" style="max-width:600px;margin-bottom:16px;background:rgba(184,135,59,0.12);border-color:rgba(184,135,59,0.35);color:var(--brass-dark);display:none;align-items:center;justify-content:space-between;gap:10px;">
+    <span id="backupBannerText"></span>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button type="button" id="backupBannerExportBtn" style="background:var(--brass);color:var(--ink);border:none;border-radius:3px;padding:6px 12px;font-size:12px;font-weight:600;">Nu exporteren</button>
+      <button type="button" id="backupBannerDismissBtn" style="background:none;border:none;color:var(--brass-dark);font-size:12px;text-decoration:underline;">Later</button>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px;">
+    <div class="search-wrap" style="margin-bottom:0;">
+      <span class="search-icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="Zoek op setnaam, thema, setnummer, locatie…">
+    </div>
+    <select id="categorySelect" style="border:1px solid var(--line);background:var(--cream);border-radius:3px;padding:9px 10px;font-size:13px;color:var(--text-dark);font-family:'Work Sans',sans-serif;display:none;">
+    </select>
+    <select id="sortSelect" style="border:1px solid var(--line);background:var(--cream);border-radius:3px;padding:9px 10px;font-size:13px;color:var(--text-dark);font-family:'Work Sans',sans-serif;">
+      <option value="nieuwste">Nieuwste eerst</option>
+      <option value="setnaam">Naam (A-Z)</option>
+      <option value="waarde">Waarde (hoog-laag)</option>
+    </select>
+  </div>
+
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <p class="title serif" id="emptyTitle">De vitrine is nog leeg.</p>
+    <p class="hint mono" id="emptyHint">Voeg je eerste set toe met een foto.</p>
+  </div>
+
+  <div id="grid" class="grid"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="serif" id="modalTitle">Nieuwe set</h2>
+      <button id="closeModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="error-box" id="errorBox"></div>
+
+      <div>
+        <label class="mono" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--brass-dark);display:block;margin-bottom:6px;">Foto's (max 5)</label>
+        <div id="photoArea"></div>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+        <div id="aiArea"></div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field full"><label>Setnaam</label><input id="f_setnaam" placeholder="Millennium Falcon"></div>
+        <div class="field"><label>Thema</label><input id="f_thema" placeholder="Star Wars"></div>
+        <div class="field"><label>Setnummer</label><input id="f_setnummer" placeholder="75192"></div>
+        <div class="field"><label>Jaar</label><input id="f_jaar"></div>
+        <div class="field"><label>Aantal onderdelen</label><input id="f_onderdelen" type="number"></div>
+        <div class="field"><label>Staat</label><input id="f_staat" placeholder="Compleet, doos en handleiding aanwezig"></div>
+        <div class="field"><label>Doos aanwezig</label>
+          <select id="f_doosAanwezig">
+            <option value="">Onbekend</option>
+            <option value="Ja">Ja</option>
+            <option value="Nee">Nee</option>
+          </select>
+        </div>
+        <div class="field"><label>Waarde vanaf (€)</label><input id="f_waardeMin" type="number"></div>
+        <div class="field"><label>Waarde tot (€)</label><input id="f_waardeMax" type="number"></div>
+        <div class="field"><label>Aankoopprijs (€)</label><input id="f_aankoopprijs" type="number"></div>
+        <div class="field"><label>Locatie in huis</label><input id="f_locatie"></div>
+        <div class="field full"><label>Notities</label><textarea id="f_notities" rows="2"></textarea></div>
+        <div class="field full"><label>AI-toelichting</label><textarea id="f_toelichting" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" id="cancelBtn">Annuleren</button>
+      <button class="btn-primary" id="saveBtn">Bewaar in setsboek</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="serif" id="detailTitle">Set</h2>
+      <button id="closeDetail">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="btn-outline" id="detailCloseBtn">Sluiten</button>
+      <button class="btn-primary" id="detailEditBtn">Bewerken</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay batch-modal" id="batchOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="serif">Batch toevoegen</h2>
+      <button id="closeBatch">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="error-box" id="batchErrorBox"></div>
+      <p class="settings-text" style="margin-bottom:10px;">Elke geselecteerde foto wordt een <strong>aparte set</strong>. Handig als je in één keer meerdere dozen fotografeert. Vul per set minimaal een naam in, of laat de AI dat voor je doen.</p>
+      <div id="batchDropArea"></div>
+      <input type="file" id="batchFileInput" accept="image/*" multiple style="display:none">
+      <div class="batch-toolbar" id="batchToolbar" style="display:none;">
+        <button class="btn-brass" id="batchAnalyzeAllBtn" style="border-radius:3px;padding:8px 14px;font-size:13px;">✨ Analyseer alles met AI</button>
+        <button class="btn-outline" id="batchAddMoreBtn" style="border:1px solid var(--line);color:var(--ink);padding:8px 14px;">+ Meer foto's</button>
+      </div>
+      <div class="batch-list" id="batchList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" id="cancelBatchBtn">Annuleren</button>
+      <button class="btn-primary" id="saveBatchBtn">Bewaar alles</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay settings-modal" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="serif">AI-herkenning</h2>
+      <button id="closeSettings">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="settings-text">
+        Vul hier je gratis Google Gemini API-key in om foto's automatisch te laten herkennen.
+        Je haalt een key op via <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>
+        — inloggen met een Google-account, geen creditcard nodig.
+      </p>
+      <div class="field full">
+        <label>Gemini API-key</label>
+        <input id="apiKeyInput" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="AIzaSy…">
+      </div>
+      <p class="settings-text" id="geminiStatus"></p>
+      <button type="button" id="clearGeminiBtn" style="background:none;border:none;color:var(--rust);font-size:12px;padding:0 0 8px;text-decoration:underline;">Key verwijderen</button>
+      <p class="settings-text" style="color:var(--brass-dark);">
+        De key wordt alleen lokaal in je browser bewaard (localStorage) en nergens anders naartoe gestuurd dan rechtstreeks naar Google.
+      </p>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:4px 0;">
+
+      <div>
+        <h2 class="serif" style="font-size:17px;margin:0 0 6px;">Synchroniseren tussen apparaten</h2>
+        <p class="settings-text">
+          Wil je dezelfde collectie zien op meerdere apparaten (bijvoorbeeld je telefoon én een tablet)? Maak eenmalig een gratis Firestore-database aan via
+          <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a>:
+        </p>
+        <ol class="settings-text" style="padding-left:18px;margin:6px 0;">
+          <li>Nieuw project aanmaken (naam maakt niet uit)</li>
+          <li>Linksmenu → Databases & Storage → Firestore → "Create database" → kies een regio dichtbij (bv. europe-west) → start in testmodus</li>
+          <li>Tabblad "Rules" → vervang de inhoud door de open regels hieronder → Publiceren</li>
+          <li>⚙ Project settings → onderaan "Your apps" → webapp toevoegen (`</>`-icoon) → kopieer het hele <span class="mono">firebaseConfig</span>-object</li>
+          <li>Plak dat object hieronder en bewaar. Doe dit op elk apparaat met dezelfde config.</li>
+        </ol>
+        <pre class="mono" style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</pre>
+        <p class="settings-text" style="color:var(--rust);">
+          Let op: deze regels maken de database open voor iedereen die de configuratie kent. Voor een privéverzameling is dat een aanvaardbaar risico zolang je de config niet deelt, maar het is geen echte beveiliging.
+        </p>
+        <div class="field full">
+          <label>Firebase-configuratie</label>
+          <textarea id="firebaseConfigInput" rows="6" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", ...}'></textarea>
+        </div>
+        <button type="button" id="clearFirebaseBtn" style="background:none;border:none;color:var(--rust);font-size:12px;padding:0 0 8px;text-decoration:underline;">Synchronisatie stopzetten</button>
+        <button class="btn-outline" id="importLocalBtn" type="button" style="margin-top:4px;">Importeer lokale sets naar synchronisatie</button>
+        <p class="settings-text" id="syncStatus"></p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" id="cancelSettings">Annuleren</button>
+      <button class="btn-primary" id="saveSettings">Bewaar instellingen</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ---------- IndexedDB helpers ----------
+const DB_NAME = 'setsboek';
+const STORE = 'items';
+let dbPromise = null;
+
+function getDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+
+async function dbGetAll() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbPut(item) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(item);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function dbDelete(id) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ---------- State ----------
+let items = [];
+let editingId = null;
+let currentPhotos = [];
+const MAX_PHOTOS = 5;
+const PHOTO_MAX_CHARS = 180000;
+
+const grid = document.getElementById('grid');
+const emptyState = document.getElementById('emptyState');
+const emptyTitle = document.getElementById('emptyTitle');
+const emptyHint = document.getElementById('emptyHint');
+const searchInput = document.getElementById('searchInput');
+const overlay = document.getElementById('overlay');
+const modalTitle = document.getElementById('modalTitle');
+const errorBox = document.getElementById('errorBox');
+const photoArea = document.getElementById('photoArea');
+const fileInput = document.getElementById('fileInput');
+const aiArea = document.getElementById('aiArea');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const detailOverlay = document.getElementById('detailOverlay');
+const firebaseConfigInput = document.getElementById('firebaseConfigInput');
+const syncStatus = document.getElementById('syncStatus');
+const syncBadge = document.getElementById('syncBadge');
+
+const fieldIds = ['setnaam','thema','setnummer','jaar','onderdelen','staat','doosAanwezig','waardeMin','waardeMax','aankoopprijs','locatie','notities','toelichting'];
+const GEMINI_KEY_STORAGE = 'setsboek_gemini_key';
+const FIREBASE_CONFIG_STORAGE = 'setsboek_firebase_config';
+let analyzing = false;
+let syncMode = false;
+let firestoreDb = null;
+let unsubscribeSnapshot = null;
+let persistenceAttempted = false;
+
+const IDENTIFY_PROMPT = `Je bent een expert in Lego-sets en verzamelaarswaarde daarvan. Bekijk de foto van de doos, het setnummer-label, of de opgebouwde set goed en geef ALLEEN een JSON-object terug, zonder andere tekst, markdown-opmaak of uitleg eromheen, in exact dit formaat:
+{"setnaam": "naam van de set zoals op de doos, bv. Millennium Falcon", "thema": "Lego-thema of serie, bv. Star Wars, Technic, City, Creator Expert, Ninjago", "setnummer": "het Lego-setnummer indien zichtbaar (meestal 4-5 cijfers), anders lege string", "jaar": "uitgavejaar indien te herleiden, anders lege string", "onderdelen": "aantal onderdelen indien vermeld op de doos, anders lege string", "staat": "korte inschatting: bv. 'compleet met doos en handleiding', 'losse onderdelen zonder doos', 'doos beschadigd maar inhoud compleet'", "doosAanwezig": "'Ja' als er duidelijk een doos op de foto staat, 'Nee' als het duidelijk losse onderdelen/opgebouwde set zonder doos betreft, anders lege string bij twijfel", "waardeMin": geheel getal in euro of null, "waardeMax": geheel getal in euro of null, "toelichting": "1 tot 2 zinnen met de redenering achter de inschatting", "vraag": "een korte, concrete vervolgvraag aan de eigenaar als je het setnummer, de compleetheid, of conditie niet zeker genoeg kunt aflezen van de foto — anders een lege string"}
+Wees realistisch en voorzichtig met waardeschattingen; uitlopende of zeldzame sets kunnen aanzienlijk meer waard zijn dan de oorspronkelijke winkelprijs, maar het blijven indicaties, geen taxaties. Stel alleen een vraag als dat de inschatting echt zou verbeteren; bij twijfel liever geen vraag.`;
+
+function fmtNum(id) { return 'f_' + id; }
+
+function getItemPhotos(item) {
+  if (item && Array.isArray(item.photos) && item.photos.length) return item.photos;
+  if (item && item.photoData) return [item.photoData];
+  return [];
+}
+
+function formatInventoryNumber(n) {
+  return 'LG-' + String(n).padStart(4, '0');
+}
+
+function resizeImage(file, maxWidth = 1000, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Kan afbeelding niet lezen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Kan bestand niet lezen'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Foto's blijven ruim onder de 1MB-documentlimiet van Firestore, ook als synchronisatie uitstaat.
+async function resizeImageWithLimit(file, maxChars = 700000) {
+  let width = 1000;
+  let quality = 0.78;
+  let dataUrl = await resizeImage(file, width, quality);
+  let attempts = 0;
+  while (dataUrl.length > maxChars && attempts < 6) {
+    width = Math.round(width * 0.8);
+    quality = Math.max(0.4, quality - 0.1);
+    dataUrl = await resizeImage(file, width, quality);
+    attempts++;
+  }
+  return dataUrl;
+}
+
+function parseFirebaseConfig(raw) {
+  let trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Verwijder eventuele meegeplakte // commentaarregels (bv. uit de Firebase-codevoorbeelden)
+  trimmed = trimmed.replace(/^\s*\/\/.*$/gm, '');
+  // Herstel "slimme aanhalingstekens" die iOS/iPadOS soms automatisch invoegt
+  trimmed = trimmed
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'");
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('Geen geldig configuratie-object gevonden');
+  const objectText = trimmed.slice(start, end + 1);
+  // eslint-disable-next-line no-new-func
+  const parsed = new Function('return (' + objectText + ');')();
+  if (!parsed || !parsed.apiKey || !parsed.projectId) throw new Error('Configuratie mist verplichte velden');
+  return parsed;
+}
+
+function getFirebaseConfig() {
+  const raw = localStorage.getItem(FIREBASE_CONFIG_STORAGE);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function showGlobalError(msg) {
+  const el = document.getElementById('globalError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function clearGlobalError() {
+  const el = document.getElementById('globalError');
+  el.textContent = '';
+  el.classList.remove('show');
+}
+
+function updateSyncBadge() {
+  syncBadge.textContent = syncMode ? '● gesynchroniseerd' : '';
+}
+
+function initSync() {
+  const config = getFirebaseConfig();
+  if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
+  if (!config) { syncMode = false; updateSyncBadge(); loadItems(); return; }
+  if (typeof firebase === 'undefined') {
+    syncMode = false;
+    updateSyncBadge();
+    showGlobalError('De Firebase-bibliotheek kon niet geladen worden. Controleer je internetverbinding en herlaad de pagina.');
+    loadItems();
+    return;
+  }
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    } else {
+      firebase.app().delete().catch(() => {});
+      firebase.initializeApp(config);
+    }
+    firestoreDb = firebase.firestore();
+    if (!persistenceAttempted) {
+      persistenceAttempted = true;
+      try {
+        firestoreDb.enablePersistence({ synchronizeTabs: true }).catch(() => {
+          // Persistentie niet beschikbaar (bv. meerdere open tabbladen of oudere browser) — app werkt dan alleen online.
+        });
+      } catch (persistErr) {
+        // Kan al gestart zijn in dit tabblad — geen probleem, gewoon doorgaan zonder offline-cache.
+      }
+    }
+    syncMode = true;
+    updateSyncBadge();
+    clearGlobalError();
+    unsubscribeSnapshot = firestoreDb.collection('sets').onSnapshot(
+      (snapshot) => {
+        clearGlobalError();
+        items = snapshot.docs.map((d) => d.data());
+        items.sort((a, b) => (b.volgnummer || 0) - (a.volgnummer || 0));
+        render();
+      },
+      (err) => {
+        showGlobalError('Synchroniseren lukt niet (' + (err && err.code ? err.code : 'onbekende fout') + '). Controleer de databaseregels bij instellingen.');
+      }
+    );
+  } catch (e) {
+    syncMode = false;
+    updateSyncBadge();
+    showGlobalError('Verbinden met Firebase mislukt: ' + (e && e.message ? e.message : String(e)));
+    loadItems();
+  }
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+}
+function clearError() {
+  errorBox.textContent = '';
+  errorBox.classList.remove('show');
+}
+
+function getApiKey() {
+  return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+}
+
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
+async function callGeminiConversation(apiKey, contents) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const maxAttempts = 3;
+  let response;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents }),
+      });
+    } catch (networkErr) {
+      throw new Error('Geen verbinding met Google kunnen maken. Controleer je internetverbinding.');
+    }
+    if (response.ok) break;
+    let detail = '';
+    try {
+      const errBody = await response.json();
+      detail = errBody?.error?.message || '';
+    } catch (e) { /* geen JSON-body */ }
+    const status = response.status;
+    const isQuota = status === 429 && /quota|free_tier_requests/i.test(detail);
+    if (isQuota) {
+      const quotaErr = new Error('Je hebt het gratis dagelijkse AI-quotum van Google bereikt. Probeer het morgen weer, of vul dit item voor nu handmatig in.');
+      quotaErr.quotaExceeded = true;
+      throw quotaErr;
+    }
+    if ((status === 503 || status === 429) && attempt < maxAttempts) {
+      await sleep(attempt * 2000); // 2s, dan 4s wachten voor een nieuwe poging
+      continue;
+    }
+    throw new Error(`AI-analyse mislukt (${status})${detail ? ': ' + detail : ''}`);
+  }
+  const data = await response.json();
+  const candidate = data?.candidates?.[0];
+  if (!candidate) {
+    throw new Error('Geen antwoord van de AI ontvangen. Mogelijk werd de foto geweigerd (' + (data?.promptFeedback?.blockReason || 'onbekende reden') + ').');
+  }
+  const text = candidate?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Geen tekstantwoord van de AI ontvangen (finishReason: ' + (candidate?.finishReason || 'onbekend') + ').');
+  return text;
+}
+
+function parseAiJson(text) {
+  const clean = text.replace(/```json|```/g, '').trim();
+  try {
+    return JSON.parse(clean);
+  } catch (parseErr) {
+    throw new Error('Het antwoord van de AI kon niet worden gelezen: ' + clean.slice(0, 120));
+  }
+}
+
+async function analyzeWithGemini(dataUrl, apiKey) {
+  const match = dataUrl.match(/^data:(.+);base64,(.*)$/);
+  if (!match) throw new Error('Ongeldige afbeelding');
+  const [, mimeType, base64] = match;
+  const contents = [{
+    role: 'user',
+    parts: [
+      { text: IDENTIFY_PROMPT },
+      { inline_data: { mime_type: mimeType, data: base64 } },
+    ],
+  }];
+  const text = await callGeminiConversation(apiKey, contents);
+  const suggestion = parseAiJson(text);
+  return { suggestion, conversation: [...contents, { role: 'model', parts: [{ text }] }] };
+}
+
+async function askGeminiFollowUp(apiKey, conversation, userAnswer) {
+  const newContents = [...conversation, {
+    role: 'user',
+    parts: [{ text: userAnswer + '\n\nGeef op basis hiervan opnieuw ALLEEN het JSON-object in exact hetzelfde format als eerder, met je bijgewerkte, definitieve inschatting. Vul "vraag" alleen opnieuw in als er nog een noodzakelijke onduidelijkheid overblijft, anders laat je dat veld leeg.' }],
+  }];
+  const text = await callGeminiConversation(apiKey, newContents);
+  const suggestion = parseAiJson(text);
+  return { suggestion, conversation: [...newContents, { role: 'model', parts: [{ text }] }] };
+}
+
+function renderPhotoArea() {
+  const thumbs = currentPhotos.map((src, idx) => `
+    <div class="photo-thumb">
+      <img src="${src}" alt="Foto ${idx + 1}">
+      ${idx === 0 ? '<span class="cover-tag">omslag</span>' : ''}
+      <button class="remove-btn" type="button" data-remove-photo="${idx}" aria-label="Verwijder foto">✕</button>
+      <div class="photo-thumb-move">
+        ${idx > 0 ? `<button type="button" data-move-photo="${idx}" data-move-dir="-1" aria-label="Naar voren">◀</button>` : '<span></span>'}
+        ${idx < currentPhotos.length - 1 ? `<button type="button" data-move-photo="${idx}" data-move-dir="1" aria-label="Naar achteren">▶</button>` : '<span></span>'}
+      </div>
+    </div>`).join('');
+  const addTile = currentPhotos.length < MAX_PHOTOS
+    ? `<button class="photo-thumb-add" id="photoAddBtn" type="button" aria-label="Foto toevoegen">+</button>`
+    : '';
+  photoArea.innerHTML = currentPhotos.length
+    ? `<div class="photo-thumb-grid">${thumbs}${addTile}</div>`
+    : `<button class="photo-drop" id="photoDropBtn" type="button">📷 Foto('s) toevoegen</button>`;
+
+  const addBtn = document.getElementById('photoAddBtn') || document.getElementById('photoDropBtn');
+  if (addBtn) addBtn.onclick = () => fileInput.click();
+
+  photoArea.querySelectorAll('[data-remove-photo]').forEach((btn) => {
+    btn.onclick = () => {
+      currentPhotos.splice(Number(btn.dataset.removePhoto), 1);
+      renderPhotoArea();
+    };
+  });
+  photoArea.querySelectorAll('[data-move-photo]').forEach((btn) => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.movePhoto);
+      const dir = Number(btn.dataset.moveDir);
+      const target = idx + dir;
+      if (target < 0 || target >= currentPhotos.length) return;
+      [currentPhotos[idx], currentPhotos[target]] = [currentPhotos[target], currentPhotos[idx]];
+      renderPhotoArea();
+    };
+  });
+  renderAiArea();
+}
+
+let aiConversation = null;
+let aiPendingQuestion = '';
+let aiFollowUpRounds = 0;
+let aiQuotaExceeded = false;
+const MAX_AI_FOLLOWUPS = 2;
+
+function renderAiArea() {
+  if (!currentPhotos.length) { aiArea.innerHTML = ''; return; }
+  const hasKey = !!getApiKey();
+  if (analyzing) {
+    aiArea.innerHTML = `<button class="btn-brass ai-btn" disabled><span class="spinner"></span> AI bekijkt de foto…</button>`;
+    return;
+  }
+  if (aiQuotaExceeded) {
+    aiArea.innerHTML = `<p class="ai-hint" style="color:var(--rust);">Dagelijkse AI-limiet bereikt — morgen weer beschikbaar. Vul dit item voor nu handmatig aan.</p>`;
+    return;
+  }
+  if (aiPendingQuestion) {
+    aiArea.innerHTML = `
+      <div class="error-box" style="background:rgba(184,135,59,0.12);border-color:rgba(184,135,59,0.35);color:var(--brass-dark);margin-bottom:8px;">
+        <strong>AI vraagt:</strong> ${aiPendingQuestion}
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <input type="text" id="aiAnswerInput" placeholder="Typ hier je antwoord…" style="flex:1;border-radius:3px;padding:8px 10px;border:1px solid var(--line);background:var(--cream);font-size:13px;">
+        <button class="btn-brass ai-btn" id="aiAnswerBtn" type="button" style="width:auto;margin:0;">Versturen</button>
+      </div>
+      <button type="button" id="aiSkipQuestionBtn" style="background:none;border:none;color:var(--brass-dark);font-size:12px;text-decoration:underline;padding:0;">Vraag overslaan</button>
+    `;
+    document.getElementById('aiAnswerBtn').onclick = handleAnswerFollowUp;
+    document.getElementById('aiAnswerInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); handleAnswerFollowUp(); }
+    });
+    document.getElementById('aiSkipQuestionBtn').onclick = () => { aiPendingQuestion = ''; aiConversation = null; renderAiArea(); };
+    return;
+  }
+  aiArea.innerHTML = `<button class="btn-brass ai-btn" id="analyzeBtn" type="button">✨ Laat AI dit herkennen</button>`;
+  document.getElementById('analyzeBtn').onclick = handleAnalyze;
+  if (!hasKey) {
+    aiArea.innerHTML += `<p class="ai-hint">Nog geen API-key ingesteld — klik op ⚙ rechtsboven om er een toe te voegen.</p>`;
+  } else if (currentPhotos.length > 1) {
+    aiArea.innerHTML += `<p class="ai-hint">De AI bekijkt alleen de omslagfoto (de eerste).</p>`;
+  }
+}
+
+function applyAiSuggestion(s) {
+  document.getElementById('f_setnaam').value = s.setnaam || document.getElementById('f_setnaam').value;
+  document.getElementById('f_thema').value = s.thema || '';
+  document.getElementById('f_setnummer').value = s.setnummer || '';
+  document.getElementById('f_jaar').value = s.jaar || '';
+  document.getElementById('f_onderdelen').value = s.onderdelen || '';
+  document.getElementById('f_staat').value = s.staat || '';
+  if (s.doosAanwezig === 'Ja' || s.doosAanwezig === 'Nee') document.getElementById('f_doosAanwezig').value = s.doosAanwezig;
+  document.getElementById('f_waardeMin').value = s.waardeMin ?? '';
+  document.getElementById('f_waardeMax').value = s.waardeMax ?? '';
+  document.getElementById('f_toelichting').value = s.toelichting || '';
+}
+
+async function handleAnalyze() {
+  const apiKey = getApiKey();
+  if (!apiKey) { showError('Stel eerst een gratis Gemini API-key in via het ⚙-icoon rechtsboven.'); return; }
+  if (aiQuotaExceeded) { renderAiArea(); return; }
+  if (!currentPhotos.length) return;
+  clearError();
+  analyzing = true;
+  aiPendingQuestion = '';
+  aiFollowUpRounds = 0;
+  renderAiArea();
+  try {
+    const { suggestion, conversation } = await analyzeWithGemini(currentPhotos[0], apiKey);
+    applyAiSuggestion(suggestion);
+    if (suggestion.vraag) {
+      aiPendingQuestion = suggestion.vraag;
+      aiConversation = conversation;
+    }
+  } catch (err) {
+    if (err && err.quotaExceeded) {
+      aiQuotaExceeded = true;
+    } else {
+      showError(err && err.message ? err.message : 'De AI kon deze foto niet analyseren. Vul de gegevens eventueel handmatig aan, of probeer het opnieuw.');
+    }
+  } finally {
+    analyzing = false;
+    renderAiArea();
+  }
+}
+
+async function handleAnswerFollowUp() {
+  const apiKey = getApiKey();
+  const input = document.getElementById('aiAnswerInput');
+  const answer = input ? input.value.trim() : '';
+  if (!answer || !aiConversation) return;
+  clearError();
+  analyzing = true;
+  renderAiArea();
+  try {
+    const { suggestion, conversation } = await askGeminiFollowUp(apiKey, aiConversation, answer);
+    applyAiSuggestion(suggestion);
+    aiFollowUpRounds += 1;
+    if (suggestion.vraag && aiFollowUpRounds < MAX_AI_FOLLOWUPS) {
+      aiPendingQuestion = suggestion.vraag;
+      aiConversation = conversation;
+    } else {
+      aiPendingQuestion = '';
+      aiConversation = null;
+    }
+  } catch (err) {
+    aiPendingQuestion = '';
+    aiConversation = null;
+    if (err && err.quotaExceeded) {
+      aiQuotaExceeded = true;
+    } else {
+      showError(err && err.message ? err.message : 'Het versturen van je antwoord is niet gelukt. Probeer het opnieuw.');
+    }
+  } finally {
+    analyzing = false;
+    renderAiArea();
+  }
+}
+
+fileInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  clearError();
+  const room = MAX_PHOTOS - currentPhotos.length;
+  const toProcess = files.slice(0, room);
+  if (files.length > room) {
+    showError(`Je kunt maximaal ${MAX_PHOTOS} foto's per set toevoegen. De eerste ${room > 0 ? room : 0} van je selectie zijn toegevoegd.`);
+  }
+  try {
+    for (const file of toProcess) {
+      const dataUrl = await resizeImageWithLimit(file, PHOTO_MAX_CHARS);
+      currentPhotos.push(dataUrl);
+    }
+    renderPhotoArea();
+  } catch (err) {
+    showError('Een van de foto\'s kon niet worden geladen. Probeer het opnieuw.');
+    renderPhotoArea();
+  }
+  e.target.value = '';
+});
+
+function openForm(item) {
+  clearError();
+  currentPhotos = item ? getItemPhotos(item).slice() : [];
+  editingId = item ? item.id : null;
+  aiPendingQuestion = '';
+  aiConversation = null;
+  aiFollowUpRounds = 0;
+  modalTitle.textContent = item ? 'Set bewerken' : 'Nieuwe set';
+  fieldIds.forEach((id) => {
+    const el = document.getElementById(fmtNum(id));
+    el.value = item ? (item[id] ?? '') : '';
+  });
+  renderPhotoArea();
+  overlay.classList.add('open');
+}
+
+function closeForm() {
+  overlay.classList.remove('open');
+  editingId = null;
+  currentPhotos = [];
+  analyzing = false;
+  aiPendingQuestion = '';
+  aiConversation = null;
+  aiFollowUpRounds = 0;
+}
+
+function detailField(label, value) {
+  if (value === null || value === undefined || value === '') return '';
+  return `<div><p class="detail-field-label">${escapeHtml(label)}</p><p class="detail-field-value">${escapeHtml(String(value))}</p></div>`;
+}
+
+function openDetail(item) {
+  const detailBody = document.getElementById('detailBody');
+  document.getElementById('detailTitle').textContent = item.setnaam || 'Set';
+  const photos = getItemPhotos(item);
+  const photoHtml = photos.length
+    ? `<div class="detail-photo-grid">${photos.map((src, i) => `<img src="${src}" alt="Foto ${i + 1}">`).join('')}</div>`
+    : `<p class="detail-field-value">Geen foto</p>`;
+  let waardeText = '';
+  if (item.waardeMin || item.waardeMax) {
+    waardeText = `€ ${item.waardeMin ?? '?'}${item.waardeMax ? ' – € ' + item.waardeMax : ''}`;
+  }
+  const datumText = item.datumToegevoegd ? new Date(item.datumToegevoegd).toLocaleDateString('nl-NL') : '';
+
+  detailBody.innerHTML = `
+    <span class="detail-stamp">${item.inventarisnummer || ''}</span>
+    ${photoHtml}
+    <div class="detail-grid">
+      ${detailField('Thema', item.thema)}
+      ${detailField('Setnummer', item.setnummer)}
+      ${detailField('Jaar', item.jaar)}
+      ${detailField('Aantal onderdelen', item.onderdelen)}
+      ${detailField('Staat', item.staat)}
+      ${detailField('Doos aanwezig', item.doosAanwezig)}
+      ${detailField('Geschatte waarde', waardeText)}
+      ${detailField('Aankoopprijs', item.aankoopprijs ? '€ ' + item.aankoopprijs : '')}
+      ${detailField('Locatie in huis', item.locatie)}
+      <div class="full">${detailField('Notities', item.notities)}</div>
+      <div class="full">${detailField('AI-toelichting', item.toelichting)}</div>
+      <div class="full">${detailField('Toegevoegd op', datumText)}</div>
+    </div>
+  `;
+  document.getElementById('detailEditBtn').onclick = () => {
+    closeDetail();
+    openForm(item);
+  };
+  detailOverlay.classList.add('open');
+}
+
+function closeDetail() {
+  detailOverlay.classList.remove('open');
+}
+
+async function loadItems() {
+  if (syncMode) return; // items komen binnen via de onSnapshot-listener
+  items = await dbGetAll();
+  items.sort((a, b) => (b.volgnummer || 0) - (a.volgnummer || 0));
+  render();
+}
+
+async function saveItem(item) {
+  if (syncMode) {
+    await firestoreDb.collection('sets').doc(item.id).set(item);
+  } else {
+    await dbPut(item);
+    await loadItems();
+  }
+}
+
+async function deleteItem(id) {
+  if (syncMode) {
+    await firestoreDb.collection('sets').doc(id).delete();
+  } else {
+    await dbDelete(id);
+    await loadItems();
+  }
+}
+
+async function importLocalItems() {
+  if (!syncMode) {
+    syncStatus.style.color = 'var(--rust)';
+    syncStatus.textContent = 'Stel eerst synchronisatie in en bewaar de instellingen voordat je importeert.';
+    return;
+  }
+  syncStatus.style.color = 'var(--forest-mid)';
+  syncStatus.textContent = 'Lokale sets worden geïmporteerd…';
+  document.getElementById('importLocalBtn').disabled = true;
+  try {
+    const localItems = await dbGetAll();
+    if (localItems.length === 0) {
+      syncStatus.textContent = 'Geen lokale sets gevonden op dit apparaat om te importeren.';
+      return;
+    }
+    let count = 0;
+    for (const item of localItems) {
+      await firestoreDb.collection('sets').doc(item.id).set(item, { merge: true });
+      count++;
+    }
+    syncStatus.textContent = `${count} lokale set${count === 1 ? '' : 'en'} geïmporteerd naar de synchronisatie.`;
+  } catch (err) {
+    syncStatus.style.color = 'var(--rust)';
+    syncStatus.textContent = 'Importeren is niet gelukt. Probeer het opnieuw.';
+  } finally {
+    document.getElementById('importLocalBtn').disabled = false;
+  }
+}
+
+let categoryFilter = '';
+
+function renderCategorySelect() {
+  const counts = {};
+  items.forEach((it) => {
+    const cat = (it.thema || '').trim();
+    if (!cat) return;
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  const cats = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+  const sel = document.getElementById('categorySelect');
+  if (!cats.length) { sel.style.display = 'none'; sel.innerHTML = ''; categoryFilter = ''; return; }
+  sel.style.display = '';
+  if (!cats.includes(categoryFilter)) categoryFilter = '';
+  sel.innerHTML = `<option value="">Alle categorieën (${items.length})</option>` +
+    cats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)} (${counts[c]})</option>`).join('');
+  sel.value = categoryFilter;
+}
+
+function sortItems(list) {
+  const mode = document.getElementById('sortSelect').value;
+  const copy = list.slice();
+  if (mode === 'setnaam') {
+    copy.sort((a, b) => (a.setnaam || '').localeCompare(b.setnaam || ''));
+  } else if (mode === 'waarde') {
+    copy.sort((a, b) => {
+      const va = (b.waardeMax ?? b.waardeMin ?? 0);
+      const vb = (a.waardeMax ?? a.waardeMin ?? 0);
+      return va - vb;
+    });
+  } else {
+    copy.sort((a, b) => (b.volgnummer || 0) - (a.volgnummer || 0));
+  }
+  return copy;
+}
+
+function render() {
+  renderCategorySelect();
+  checkBackupReminder();
+  const q = searchInput.value.trim().toLowerCase();
+  let filtered = items.filter((it) => {
+    if (categoryFilter && (it.thema || '').trim() !== categoryFilter) return false;
+    if (!q) return true;
+    return [it.setnaam, it.thema, it.setnummer, it.jaar, it.locatie]
+      .filter(Boolean).some((v) => v.toLowerCase().includes(q));
+  });
+  filtered = sortItems(filtered);
+
+  document.getElementById('exportBtn').disabled = items.length === 0;
+  document.getElementById('exportPdfBtn').disabled = items.length === 0;
+  document.getElementById('exportInsuranceBtn').disabled = items.length === 0;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    emptyState.style.display = 'block';
+    if (items.length === 0) {
+      emptyTitle.textContent = 'De vitrine is nog leeg.';
+      emptyHint.textContent = 'Voeg je eerste set toe met een foto.';
+    } else {
+      emptyTitle.textContent = 'Niets gevonden.';
+      emptyHint.textContent = 'Probeer een andere zoekterm.';
+    }
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  grid.innerHTML = filtered.map((it) => {
+    const photos = getItemPhotos(it);
+    const photoHtml = photos.length
+      ? `<img src="${photos[0]}" alt="${escapeHtml(it.setnaam)}">`
+      : `<div class="photo-placeholder">geen foto</div>`;
+    const countBadge = photos.length > 1 ? `<span class="photo-count-badge">📷 ${photos.length}</span>` : '';
+    const locHtml = it.locatie ? `<p class="loc">${escapeHtml(it.locatie)}</p>` : '';
+    const catHtml = it.thema ? `<span class="tag">${escapeHtml(it.thema)}</span>` : '';
+    const nrHtml = it.setnummer ? `<p class="loc" style="color:var(--forest-mid);">#${escapeHtml(it.setnummer)}</p>` : '';
+    const doosHtml = it.doosAanwezig ? `<span class="tag" style="color:${it.doosAanwezig === 'Ja' ? 'var(--forest-mid)' : 'var(--rust)'};">Doos: ${escapeHtml(it.doosAanwezig)}</span>` : '';
+    return `
+      <div class="card" data-view="${it.id}">
+        <div class="photo-wrap">
+          ${photoHtml}
+          <span class="stamp mono">${it.inventarisnummer}</span>
+          ${countBadge}
+        </div>
+        <div class="card-body">
+          <h3 class="serif">${escapeHtml(it.setnaam)}</h3>
+          ${nrHtml}
+          ${catHtml}
+          ${doosHtml}
+          ${locHtml}
+          <div class="card-actions">
+            <button class="btn-outline" data-edit="${it.id}">Bewerken</button>
+            <button class="btn-outline danger" data-delete="${it.id}">Verwijder</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  grid.querySelectorAll('[data-view]').forEach((card) => {
+    card.style.cursor = 'pointer';
+    card.onclick = (e) => {
+      if (e.target.closest('[data-edit]') || e.target.closest('[data-delete]')) return;
+      const item = items.find((i) => i.id === card.dataset.view);
+      if (item) openDetail(item);
+    };
+  });
+
+  grid.querySelectorAll('[data-edit]').forEach((btn) => {
+    btn.onclick = () => {
+      const item = items.find((i) => i.id === btn.dataset.edit);
+      if (item) openForm(item);
+    };
+  });
+  grid.querySelectorAll('[data-delete]').forEach((btn) => {
+    btn.onclick = async () => {
+      if (!confirm('Deze set definitief verwijderen?')) return;
+      try {
+        await deleteItem(btn.dataset.delete);
+      } catch (err) {
+        showGlobalError('Verwijderen is niet gelukt.');
+      }
+    };
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+async function handleSave() {
+  clearError();
+  if (!currentPhotos.length) { showError('Voeg eerst een foto toe.'); return; }
+  const setnaam = document.getElementById('f_setnaam').value.trim();
+  if (!setnaam) { showError('Geef de set een naam.'); return; }
+
+  const id = editingId || String(Date.now());
+  const existing = editingId ? items.find((i) => i.id === editingId) : null;
+  const volgnummer = existing ? existing.volgnummer : (Math.max(0, ...items.map((i) => i.volgnummer || 0)) + 1);
+
+  const item = {
+    id,
+    volgnummer,
+    inventarisnummer: existing ? existing.inventarisnummer : formatInventoryNumber(volgnummer),
+    photos: currentPhotos.slice(),
+    setnaam,
+    thema: document.getElementById('f_thema').value.trim(),
+    setnummer: document.getElementById('f_setnummer').value.trim(),
+    jaar: document.getElementById('f_jaar').value.trim(),
+    onderdelen: document.getElementById('f_onderdelen').value.trim(),
+    staat: document.getElementById('f_staat').value.trim(),
+    doosAanwezig: document.getElementById('f_doosAanwezig').value,
+    waardeMin: document.getElementById('f_waardeMin').value === '' ? null : Number(document.getElementById('f_waardeMin').value),
+    waardeMax: document.getElementById('f_waardeMax').value === '' ? null : Number(document.getElementById('f_waardeMax').value),
+    aankoopprijs: document.getElementById('f_aankoopprijs').value === '' ? null : Number(document.getElementById('f_aankoopprijs').value),
+    locatie: document.getElementById('f_locatie').value.trim(),
+    notities: document.getElementById('f_notities').value.trim(),
+    toelichting: document.getElementById('f_toelichting').value.trim(),
+    datumToegevoegd: existing ? existing.datumToegevoegd : new Date().toISOString(),
+  };
+
+  try {
+    await saveItem(item);
+    closeForm();
+  } catch (err) {
+    showError('Opslaan is niet gelukt: ' + (err && err.message ? err.message : String(err)));
+  }
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function handleExport() {
+  const exportBtnEl = document.getElementById('exportBtn');
+  exportBtnEl.disabled = true;
+  try {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Bouwboek');
+    sheet.columns = [
+      { header: 'Inventarisnummer', key: 'inventarisnummer', width: 14 },
+      { header: 'Foto', key: 'foto', width: 13 },
+      { header: 'Setnaam', key: 'setnaam', width: 26 },
+      { header: 'Thema', key: 'thema', width: 16 },
+      { header: 'Setnummer', key: 'setnummer', width: 14 },
+      { header: 'Jaar', key: 'jaar', width: 10 },
+      { header: 'Aantal onderdelen', key: 'onderdelen', width: 16 },
+      { header: 'Staat', key: 'staat', width: 22 },
+      { header: 'Doos aanwezig', key: 'doosAanwezig', width: 14 },
+      { header: 'Geschatte waarde min (€)', key: 'waardeMin', width: 16 },
+      { header: 'Geschatte waarde max (€)', key: 'waardeMax', width: 16 },
+      { header: 'Aankoopprijs (€)', key: 'aankoopprijs', width: 14 },
+      { header: 'Locatie in huis', key: 'locatie', width: 18 },
+      { header: 'Notities', key: 'notities', width: 32 },
+      { header: 'AI-toelichting', key: 'toelichting', width: 32 },
+      { header: 'Datum toegevoegd', key: 'datum', width: 14 },
+    ];
+    sheet.getRow(1).font = { bold: true };
+
+    items.forEach((it, idx) => {
+      const rowNumber = idx + 2;
+      sheet.addRow({
+        inventarisnummer: it.inventarisnummer,
+        foto: '',
+        setnaam: it.setnaam,
+        thema: it.thema,
+        setnummer: it.setnummer,
+        jaar: it.jaar,
+        onderdelen: it.onderdelen,
+        staat: it.staat,
+        doosAanwezig: it.doosAanwezig || '',
+        waardeMin: it.waardeMin ?? '',
+        waardeMax: it.waardeMax ?? '',
+        aankoopprijs: it.aankoopprijs ?? '',
+        locatie: it.locatie,
+        notities: it.notities,
+        toelichting: it.toelichting,
+        datum: it.datumToegevoegd ? new Date(it.datumToegevoegd).toLocaleDateString('nl-NL') : '',
+      });
+      sheet.getRow(rowNumber).height = 58;
+
+      const photos = getItemPhotos(it);
+      if (photos.length) {
+        try {
+          const imageId = workbook.addImage({ base64: photos[0], extension: 'jpeg' });
+          sheet.addImage(imageId, {
+            tl: { col: 1, row: rowNumber - 1 },
+            ext: { width: 66, height: 66 },
+          });
+        } catch (imgErr) { /* foto overslaan als embedden mislukt */ }
+      }
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    triggerDownload(blob, `setsboek-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    markExported();
+  } catch (err) {
+    showGlobalError('Exporteren naar Excel is niet gelukt: ' + (err && err.message ? err.message : String(err)));
+  } finally {
+    exportBtnEl.disabled = items.length === 0;
+  }
+}
+
+function getImageDims(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth || 1, h: img.naturalHeight || 1 });
+    img.onerror = () => resolve({ w: 1, h: 1 });
+    img.src = dataUrl;
+  });
+}
+
+async function handleExportPdf() {
+  if (!items.length) return;
+  const btn = document.getElementById('exportPdfBtn');
+  btn.disabled = true;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const marginX = 18;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const contentW = pageW - marginX * 2;
+
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (i > 0) doc.addPage();
+      let y = 20;
+
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(156, 59, 46);
+      doc.text(it.inventarisnummer || '', pageW - marginX, y, { align: 'right' });
+
+      doc.setFont('times', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(27, 42, 30);
+      const nameLines = doc.splitTextToSize(it.setnaam || 'Zonder setnaam', contentW - 25);
+      doc.text(nameLines, marginX, y);
+      y += nameLines.length * 8 + 4;
+
+      doc.setDrawColor(184, 135, 59);
+      doc.setLineWidth(0.4);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 8;
+
+      const photos = getItemPhotos(it);
+      if (photos.length) {
+        const maxImgW = 80, maxImgH = 80;
+        const dims = await getImageDims(photos[0]);
+        let w = maxImgW, h = (dims.h / dims.w) * w;
+        if (h > maxImgH) { h = maxImgH; w = (dims.w / dims.h) * h; }
+        doc.addImage(photos[0], 'JPEG', marginX, y, w, h);
+
+        if (photos.length > 1) {
+          const thumbSize = 22;
+          let tx = marginX + w + 6;
+          let ty = y;
+          for (let p = 1; p < photos.length && p <= 4; p++) {
+            if (tx + thumbSize > pageW - marginX) break;
+            const tdims = await getImageDims(photos[p]);
+            let tw = thumbSize, th = (tdims.h / tdims.w) * tw;
+            if (th > thumbSize) { th = thumbSize; tw = (tdims.w / tdims.h) * th; }
+            doc.addImage(photos[p], 'JPEG', tx, ty, tw, th);
+            ty += thumbSize + 4;
+            if (ty + thumbSize > y + h) { ty = y; tx += thumbSize + 4; }
+          }
+        }
+        y += h + 10;
+      }
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(36, 31, 23);
+
+      const waardeText = (it.waardeMin || it.waardeMax) ? `€ ${it.waardeMin ?? '?'}${it.waardeMax ? ' – € ' + it.waardeMax : ''}` : '';
+      const fields = [
+        ['Thema', it.thema],
+        ['Setnummer', it.setnummer],
+        ['Jaar', it.jaar],
+        ['Aantal onderdelen', it.onderdelen],
+        ['Staat', it.staat],
+        ['Doos aanwezig', it.doosAanwezig],
+        ['Geschatte waarde', waardeText],
+        ['Aankoopprijs', it.aankoopprijs ? `€ ${it.aankoopprijs}` : ''],
+        ['Locatie in huis', it.locatie],
+        ['Toegevoegd op', it.datumToegevoegd ? new Date(it.datumToegevoegd).toLocaleDateString('nl-NL') : ''],
+      ].filter(([, v]) => v);
+
+      fields.forEach(([label, value]) => {
+        if (y > pageH - 25) { doc.addPage(); y = 20; }
+        doc.setFont('helvetica', 'bold');
+        doc.text(label + ':', marginX, y);
+        doc.setFont('helvetica', 'normal');
+        const valueLines = doc.splitTextToSize(String(value), contentW - 55);
+        doc.text(valueLines, marginX + 50, y);
+        y += Math.max(6, valueLines.length * 5);
+      });
+
+      if (it.notities) {
+        y += 3;
+        if (y > pageH - 25) { doc.addPage(); y = 20; }
+        doc.setFont('helvetica', 'bold');
+        doc.text('Notities:', marginX, y);
+        y += 5;
+        doc.setFont('helvetica', 'normal');
+        const noteLines = doc.splitTextToSize(it.notities, contentW);
+        if (y + noteLines.length * 5 > pageH - 15) { doc.addPage(); y = 20; }
+        doc.text(noteLines, marginX, y);
+        y += noteLines.length * 5;
+      }
+
+      if (it.toelichting) {
+        y += 3;
+        if (y > pageH - 25) { doc.addPage(); y = 20; }
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(143, 107, 44);
+        const aiLines = doc.splitTextToSize('AI: ' + it.toelichting, contentW);
+        if (y + aiLines.length * 5 > pageH - 15) { doc.addPage(); y = 20; }
+        doc.text(aiLines, marginX, y);
+      }
+    }
+
+    doc.save(`setsboek-${new Date().toISOString().slice(0, 10)}.pdf`);
+    markExported();
+  } catch (err) {
+    showGlobalError('PDF maken is niet gelukt: ' + (err && err.message ? err.message : String(err)));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleExportInsurance() {
+  if (!items.length) return;
+  const btn = document.getElementById('exportInsuranceBtn');
+  btn.disabled = true;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const marginX = 16;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const contentW = pageW - marginX * 2;
+    const rowH = 22;
+
+    const sorted = items.slice().sort((a, b) => (b.waardeMax ?? b.waardeMin ?? 0) - (a.waardeMax ?? a.waardeMin ?? 0));
+    const totalMin = sorted.reduce((sum, it) => sum + (it.waardeMin ?? it.waardeMax ?? 0), 0);
+    const totalMax = sorted.reduce((sum, it) => sum + (it.waardeMax ?? it.waardeMin ?? 0), 0);
+
+    let y = 20;
+    function drawHeader() {
+      doc.setFont('times', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(27, 42, 30);
+      doc.text('Verzekeringsrapport — Bouwboek', marginX, y);
+      y += 7;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text('Gegenereerd op ' + new Date().toLocaleDateString('nl-NL') + ' — ' + sorted.length + ' sets', marginX, y);
+      y += 5;
+      doc.setDrawColor(184, 135, 59);
+      doc.setLineWidth(0.4);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 8;
+    }
+    drawHeader();
+
+    for (const it of sorted) {
+      if (y + rowH > pageH - 20) {
+        doc.addPage();
+        y = 20;
+        drawHeader();
+      }
+      const photos = getItemPhotos(it);
+      if (photos.length) {
+        try {
+          const dims = await getImageDims(photos[0]);
+          let w = rowH - 2, h = (dims.h / dims.w) * w;
+          if (h > rowH - 2) { h = rowH - 2; w = (dims.w / dims.h) * h; }
+          doc.addImage(photos[0], 'JPEG', marginX, y, w, h);
+        } catch (e) { /* geen foto beschikbaar, sla over */ }
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(27, 42, 30);
+      doc.text(it.setnaam || 'Zonder setnaam', marginX + rowH, y + 5);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      const sub = [it.thema, it.setnummer, it.inventarisnummer].filter(Boolean).join(' · ');
+      doc.text(sub, marginX + rowH, y + 11);
+      const waardeText = (it.waardeMin || it.waardeMax) ? `€ ${it.waardeMin ?? '?'}${it.waardeMax ? ' – € ' + it.waardeMax : ''}` : 'geen inschatting';
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(156, 59, 46);
+      doc.text(waardeText, pageW - marginX, y + 7, { align: 'right' });
+      doc.setDrawColor(217, 205, 174);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, y + rowH - 2, pageW - marginX, y + rowH - 2);
+      y += rowH;
+    }
+
+    if (y + 16 > pageH - 20) { doc.addPage(); y = 20; }
+    y += 4;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(27, 42, 30);
+    doc.text('Totale geschatte waarde:', marginX, y);
+    doc.setTextColor(156, 59, 46);
+    doc.text(`€ ${totalMin} – € ${totalMax}`, pageW - marginX, y, { align: 'right' });
+
+    doc.save(`verzekeringsrapport-${new Date().toISOString().slice(0, 10)}.pdf`);
+    markExported();
+  } catch (err) {
+    showGlobalError('Verzekeringsrapport maken is niet gelukt: ' + (err && err.message ? err.message : String(err)));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ---------- Back-up-herinnering ----------
+const LAST_EXPORT_STORAGE = 'setsboek_last_export';
+const BACKUP_DISMISS_STORAGE = 'setsboek_backup_dismiss';
+const BACKUP_REMINDER_DAYS = 30;
+const BACKUP_DISMISS_DAYS = 7;
+
+function markExported() {
+  localStorage.setItem(LAST_EXPORT_STORAGE, new Date().toISOString());
+  document.getElementById('backupBanner').style.display = 'none';
+}
+
+function checkBackupReminder() {
+  if (!items.length) return;
+  const lastExport = localStorage.getItem(LAST_EXPORT_STORAGE);
+  const lastDismiss = localStorage.getItem(BACKUP_DISMISS_STORAGE);
+  const now = Date.now();
+  const daysSince = (iso) => (now - new Date(iso).getTime()) / (1000 * 60 * 60 * 24);
+
+  if (lastDismiss && daysSince(lastDismiss) < BACKUP_DISMISS_DAYS) return;
+  if (lastExport && daysSince(lastExport) < BACKUP_REMINDER_DAYS) return;
+
+  const banner = document.getElementById('backupBanner');
+  const text = document.getElementById('backupBannerText');
+  text.textContent = lastExport
+    ? `Je hebt al ${Math.floor(daysSince(lastExport))} dagen geen back-up gemaakt van je sets.`
+    : 'Je hebt nog geen back-up gemaakt van je sets — export je collectie eens naar Excel of PDF.';
+  banner.style.display = 'flex';
+}
+document.getElementById('backupBannerExportBtn').onclick = () => handleExport();
+document.getElementById('backupBannerDismissBtn').onclick = () => {
+  localStorage.setItem(BACKUP_DISMISS_STORAGE, new Date().toISOString());
+  document.getElementById('backupBanner').style.display = 'none';
+};
+
+// ---------- Events ----------
+document.getElementById('addBtn').onclick = () => { closeAllMenus(); openForm(null); };
+document.getElementById('closeModal').onclick = closeForm;
+document.getElementById('cancelBtn').onclick = closeForm;
+document.getElementById('saveBtn').onclick = handleSave;
+document.getElementById('exportBtn').onclick = () => { closeAllMenus(); handleExport(); };
+document.getElementById('exportPdfBtn').onclick = () => { closeAllMenus(); handleExportPdf(); };
+document.getElementById('exportInsuranceBtn').onclick = () => { closeAllMenus(); handleExportInsurance(); };
+
+function closeAllMenus() {
+  document.querySelectorAll('.dropdown-menu.open').forEach((m) => m.classList.remove('open'));
+}
+function toggleMenu(menuId) {
+  const menu = document.getElementById(menuId);
+  const wasOpen = menu.classList.contains('open');
+  closeAllMenus();
+  if (!wasOpen) menu.classList.add('open');
+}
+document.getElementById('exportMenuBtn').onclick = (e) => { e.stopPropagation(); toggleMenu('exportMenu'); };
+document.getElementById('addMenuBtn').onclick = (e) => { e.stopPropagation(); toggleMenu('addMenu'); };
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.dropdown-wrap')) closeAllMenus();
+});
+
+searchInput.addEventListener('input', render);
+document.getElementById('sortSelect').addEventListener('change', render);
+document.getElementById('categorySelect').addEventListener('change', () => {
+  categoryFilter = document.getElementById('categorySelect').value;
+  render();
+});
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeForm(); });
+
+document.getElementById('closeDetail').onclick = closeDetail;
+document.getElementById('detailCloseBtn').onclick = closeDetail;
+detailOverlay.addEventListener('click', (e) => { if (e.target === detailOverlay) closeDetail(); });
+
+// ---------- Batch toevoegen ----------
+const MAX_BATCH = 20;
+let batchItems = [];
+const batchOverlay = document.getElementById('batchOverlay');
+const batchDropArea = document.getElementById('batchDropArea');
+const batchFileInput = document.getElementById('batchFileInput');
+const batchList = document.getElementById('batchList');
+const batchToolbar = document.getElementById('batchToolbar');
+const batchErrorBox = document.getElementById('batchErrorBox');
+
+function showBatchError(msg) {
+  batchErrorBox.textContent = msg;
+  batchErrorBox.classList.add('show');
+}
+function clearBatchError() {
+  batchErrorBox.textContent = '';
+  batchErrorBox.classList.remove('show');
+}
+
+function openBatch() {
+  batchItems = [];
+  clearBatchError();
+  renderBatchDropArea();
+  renderBatchList();
+  batchOverlay.classList.add('open');
+}
+function closeBatch() {
+  batchOverlay.classList.remove('open');
+  batchItems = [];
+}
+
+function renderBatchDropArea() {
+  batchDropArea.innerHTML = `<button class="batch-drop" type="button" id="batchDropBtn">📷 Selecteer foto's — elke foto wordt een aparte set</button>`;
+  document.getElementById('batchDropBtn').onclick = () => batchFileInput.click();
+}
+
+function renderBatchList() {
+  batchToolbar.style.display = batchItems.length ? 'flex' : 'none';
+  if (!batchItems.length) { batchList.innerHTML = ''; return; }
+  batchList.innerHTML = batchItems.map((b, idx) => `
+    <div class="batch-card${b.analyzing ? ' analyzing' : ''}">
+      <img src="${b.photoData}" alt="Set ${idx + 1}">
+      <div class="batch-card-fields">
+        <div class="batch-card-row">
+          <input type="text" placeholder="Setnaam *" value="${b.setnaam.replace(/"/g, '&quot;')}" data-batch-field="setnaam" data-batch-idx="${idx}">
+          <input type="text" placeholder="Thema" value="${b.thema.replace(/"/g, '&quot;')}" data-batch-field="thema" data-batch-idx="${idx}">
+        </div>
+        <div class="batch-card-row">
+          <input type="text" placeholder="Setnummer" value="${b.setnummer.replace(/"/g, '&quot;')}" data-batch-field="setnummer" data-batch-idx="${idx}">
+          <input type="number" placeholder="Waarde vanaf (€)" value="${b.waardeMin}" data-batch-field="waardeMin" data-batch-idx="${idx}">
+          <input type="number" placeholder="Waarde tot (€)" value="${b.waardeMax}" data-batch-field="waardeMax" data-batch-idx="${idx}">
+        </div>
+        ${b.error ? `<p class="batch-card-err">${b.error}</p>` : ''}
+      </div>
+      <button class="batch-card-remove" type="button" data-batch-remove="${idx}" aria-label="Verwijder">✕</button>
+    </div>
+  `).join('');
+
+  batchList.querySelectorAll('[data-batch-field]').forEach((inp) => {
+    inp.oninput = () => {
+      const idx = Number(inp.dataset.batchIdx);
+      const field = inp.dataset.batchField;
+      batchItems[idx][field] = inp.value;
+    };
+  });
+  batchList.querySelectorAll('[data-batch-remove]').forEach((btn) => {
+    btn.onclick = () => {
+      batchItems.splice(Number(btn.dataset.batchRemove), 1);
+      renderBatchList();
+    };
+  });
+}
+
+batchFileInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  clearBatchError();
+  const room = MAX_BATCH - batchItems.length;
+  const toProcess = files.slice(0, room);
+  if (files.length > room) {
+    showBatchError(`Je kunt maximaal ${MAX_BATCH} sets in één batch verwerken. De eerste ${room > 0 ? room : 0} van je selectie zijn toegevoegd.`);
+  }
+  try {
+    for (const file of toProcess) {
+      const dataUrl = await resizeImageWithLimit(file, PHOTO_MAX_CHARS);
+      batchItems.push({ photoData: dataUrl, setnaam: '', thema: '', setnummer: '', waardeMin: '', waardeMax: '', analyzing: false, error: '' });
+    }
+    renderBatchList();
+  } catch (err) {
+    showBatchError('Een van de foto\'s kon niet worden geladen.');
+  }
+  e.target.value = '';
+});
+
+async function analyzeAllBatch() {
+  const apiKey = getApiKey();
+  if (!apiKey) { showBatchError('Stel eerst een gratis Gemini API-key in via het ⚙-icoon rechtsboven.'); return; }
+  if (aiQuotaExceeded) { showBatchError('Dagelijkse AI-limiet bereikt — morgen weer beschikbaar. Vul de items voor nu handmatig aan.'); return; }
+  clearBatchError();
+  const analyzeBtn = document.getElementById('batchAnalyzeAllBtn');
+  analyzeBtn.disabled = true;
+  for (let i = 0; i < batchItems.length; i++) {
+    const b = batchItems[i];
+    if (b.setnaam) continue; // al ingevuld, niet overschrijven
+    b.analyzing = true;
+    b.error = '';
+    renderBatchList();
+    analyzeBtn.textContent = `✨ Bezig… (${i + 1}/${batchItems.length})`;
+    try {
+      const { suggestion: s } = await analyzeWithGemini(b.photoData, apiKey);
+      b.setnaam = s.setnaam || '';
+      b.thema = s.thema || '';
+      b.setnummer = s.setnummer || '';
+      b.waardeMin = s.waardeMin ?? '';
+      b.waardeMax = s.waardeMax ?? '';
+    } catch (err) {
+      b.analyzing = false;
+      if (err && err.quotaExceeded) {
+        aiQuotaExceeded = true;
+        showBatchError('Dagelijkse AI-limiet bereikt — morgen weer beschikbaar. Vul de resterende items voor nu handmatig aan.');
+        renderBatchList();
+        break;
+      }
+      b.error = err && err.message ? err.message : 'AI-herkenning mislukt voor deze foto.';
+    } finally {
+      b.analyzing = false;
+    }
+  }
+  analyzeBtn.textContent = '✨ Analyseer alles met AI';
+  analyzeBtn.disabled = false;
+  renderBatchList();
+}
+
+async function saveBatchAll() {
+  clearBatchError();
+  const toSave = batchItems.filter((b) => b.setnaam.trim());
+  const skipped = batchItems.length - toSave.length;
+  if (!toSave.length) { showBatchError('Geef minimaal één set een naam voordat je opslaat.'); return; }
+  const saveBtn = document.getElementById('saveBatchBtn');
+  saveBtn.disabled = true;
+  let volgnummer = Math.max(0, ...items.map((i) => i.volgnummer || 0));
+  try {
+    for (const b of toSave) {
+      volgnummer += 1;
+      const id = `${Date.now()}_${volgnummer}`;
+      const item = {
+        id,
+        volgnummer,
+        inventarisnummer: formatInventoryNumber(volgnummer),
+        photos: [b.photoData],
+        setnaam: b.setnaam.trim(),
+        thema: b.thema.trim(),
+        setnummer: b.setnummer.trim(),
+        jaar: '',
+        onderdelen: '',
+        staat: '',
+        waardeMin: b.waardeMin === '' ? null : Number(b.waardeMin),
+        waardeMax: b.waardeMax === '' ? null : Number(b.waardeMax),
+        aankoopprijs: null,
+        locatie: '',
+        notities: '',
+        toelichting: '',
+        datumToegevoegd: new Date().toISOString(),
+      };
+      await saveItem(item);
+    }
+    if (!syncMode) await loadItems();
+    closeBatch();
+  } catch (err) {
+    showBatchError('Opslaan is niet gelukt. Probeer het opnieuw.');
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+document.getElementById('batchAddBtn').onclick = () => { closeAllMenus(); openBatch(); };
+document.getElementById('closeBatch').onclick = closeBatch;
+document.getElementById('cancelBatchBtn').onclick = closeBatch;
+document.getElementById('batchAddMoreBtn').onclick = () => batchFileInput.click();
+document.getElementById('batchAnalyzeAllBtn').onclick = analyzeAllBatch;
+document.getElementById('saveBatchBtn').onclick = saveBatchAll;
+batchOverlay.addEventListener('click', (e) => { if (e.target === batchOverlay) closeBatch(); });
+
+function updateGeminiStatus() {
+  const geminiStatus = document.getElementById('geminiStatus');
+  if (getApiKey()) {
+    geminiStatus.style.color = 'var(--forest-mid)';
+    geminiStatus.textContent = '✓ Gemini-key is ingesteld.';
+  } else {
+    geminiStatus.style.color = 'var(--brass-dark)';
+    geminiStatus.textContent = 'Nog geen Gemini-key ingesteld — AI-herkenning werkt pas als je er een toevoegt.';
+  }
+}
+
+function openSettings() {
+  apiKeyInput.value = getApiKey();
+  const config = getFirebaseConfig();
+  firebaseConfigInput.value = config ? JSON.stringify(config, null, 2) : '';
+  syncStatus.textContent = syncMode ? 'Synchronisatie is actief op dit apparaat.' : '';
+  syncStatus.style.color = 'var(--forest-mid)';
+  updateGeminiStatus();
+  settingsOverlay.classList.add('open');
+}
+function closeSettings() {
+  settingsOverlay.classList.remove('open');
+}
+document.getElementById('settingsBtn').onclick = openSettings;
+document.getElementById('closeSettings').onclick = closeSettings;
+document.getElementById('cancelSettings').onclick = closeSettings;
+document.getElementById('importLocalBtn').onclick = importLocalItems;
+document.getElementById('clearGeminiBtn').onclick = () => {
+  if (!confirm('Gemini API-key verwijderen? AI-herkenning werkt dan niet meer totdat je een nieuwe key invult.')) return;
+  localStorage.removeItem(GEMINI_KEY_STORAGE);
+  apiKeyInput.value = '';
+  updateGeminiStatus();
+};
+document.getElementById('clearFirebaseBtn').onclick = () => {
+  if (!confirm('Synchronisatie stopzetten op dit apparaat? Je sets blijven bewaard in de cloud, maar dit apparaat gebruikt daarna weer alleen lokale opslag totdat je opnieuw een configuratie invult.')) return;
+  localStorage.removeItem(FIREBASE_CONFIG_STORAGE);
+  firebaseConfigInput.value = '';
+  syncStatus.style.color = 'var(--forest-mid)';
+  syncStatus.textContent = 'Synchronisatie uitgeschakeld — gegevens blijven lokaal op dit apparaat.';
+  initSync();
+};
+document.getElementById('saveSettings').onclick = () => {
+  const key = apiKeyInput.value.trim();
+  if (key) {
+    localStorage.setItem(GEMINI_KEY_STORAGE, key);
+  }
+  // Een leeg veld verwijdert de key niet meer — gebruik "Key verwijderen" om 'm bewust te wissen.
+  updateGeminiStatus();
+
+  const rawConfig = firebaseConfigInput.value.trim();
+  if (!rawConfig) {
+    // Een leeg veld laat een bestaande synchronisatie-configuratie ongemoeid.
+    syncStatus.style.color = 'var(--forest-mid)';
+    syncStatus.textContent = getFirebaseConfig()
+      ? 'Synchronisatie-instellingen ongewijzigd (veld was leeg — gebruik "Synchronisatie stopzetten" om echt te stoppen).'
+      : 'Synchronisatie is niet ingesteld — gegevens blijven lokaal op dit apparaat.';
+    return;
+  }
+  try {
+    const parsed = parseFirebaseConfig(rawConfig);
+    localStorage.setItem(FIREBASE_CONFIG_STORAGE, JSON.stringify(parsed));
+    syncStatus.style.color = 'var(--forest-mid)';
+    syncStatus.textContent = 'Instellingen bewaard, synchronisatie wordt gestart…';
+    renderAiArea();
+    initSync();
+  } catch (err) {
+    syncStatus.style.color = 'var(--rust)';
+    syncStatus.textContent = 'Kon de configuratie niet lezen. Plak het hele firebaseConfig-object, inclusief { }.';
+  }
+};
+settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettings(); });
+
+initSync();
+</script>
+</body>
+</html>
